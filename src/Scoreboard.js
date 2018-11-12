@@ -8,9 +8,7 @@ function Scoreboard() {
 
 Scoreboard.prototype.loadScores = function () {
     this.previousScores = JSON.parse(localStorage.scores || 'null') || [];
-    this.previousScores.sort(function (a, b) {
-        return b.score - a.score;
-    })
+    this.sortScores();
 }
 
 Scoreboard.prototype.updateScore = function (rowsRemoved) {
@@ -28,9 +26,16 @@ Scoreboard.prototype.reset = function () {
         time: Date.now(),
         score: this.score,
     });
+    this.sortScores();
     this.score = 0;
     localStorage.scores = JSON.stringify(this.previousScores);
     this.renderScore();
+};
+
+Scoreboard.prototype.sortScores = function () {
+    this.previousScores.sort(function (a, b) {
+        return b.score - a.score;
+    })
 };
 
 Scoreboard.prototype.renderScore = function () {
