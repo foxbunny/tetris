@@ -43,7 +43,7 @@ Scoreboard.prototype.renderScore = function () {
             '</li>'
         ].join('')
     });
-    const html = [
+    this.board.innerHTML = [
         '<div class="currentScore">',
         this.score,
         '</div>',
@@ -51,7 +51,6 @@ Scoreboard.prototype.renderScore = function () {
         previous,
         '</ul>',
     ].join('');
-    this.board.innerHTML = html;
 };
 
 module.exports = Scoreboard;
