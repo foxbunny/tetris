@@ -7,24 +7,32 @@ var Scoreboard = require('./Scoreboard');
 var Audio = require('./Audio');
 
 var bgm = require('./media/tetris.mp3');
+var beep = require('./media/beep.mp3');
 
 var DEFAULT_BOARD_WIDTH = 12;
 var DEFAULT_BOARD_HEIGHT = 20;
 var DROP_INTERVAL = 1000;
 
 function Game(width, height) {
+    var self = this;
+
     this.width = width || DEFAULT_BOARD_WIDTH;
     this.height = height || DEFAULT_BOARD_HEIGHT;
 
     this.screen = new Screen(this.width, this.height, 20)
     this.timer = new DropTimer(DROP_INTERVAL);
     this.scoreboard = new Scoreboard();
-    this.audio = new Audio(bgm);
+
+    this.bgm = new Audio(bgm, true);
+    this.bgm.load(function () {
+        self.bgm.start();
+    });
+    this.sfxBeep = new Audio(beep, false);
+    this.sfxBeep.load();
 
     this.paused = true;
     this.gameTime = 0;
     this.reset();
-    this.audio.loop();
     this.update(0);
 
     this.keyMap = this.createKeymap();
@@ -53,13 +61,13 @@ Game.prototype.togglePause = function () {
 
 Game.prototype.pause = function () {
     this.paused = true;
-    this.audio.stop();
+    this.bgm.mute();
 };
 
 Game.prototype.resume = function () {
     this.paused = false;
     this.update(this.gameTime);
-    this.audio.resume();
+    this.bgm.unmute();
 };
 
 Game.prototype.reset = function () {
@@ -68,11 +76,6 @@ Game.prototype.reset = function () {
     this.board = new Board(this.width, this.height);
     this.player.reset();
     this.scoreboard.reset();
-};
-
-Game.prototype.updateTimeDelta = function (time) {
-    this.frameTimeDelta = time - this.lastFrameTime;
-    this.lastFrameTime = time;
 };
 
 Game.prototype.update = function (time) {
@@ -99,6 +102,9 @@ Game.prototype.playerReset = function () {
 Game.prototype.dropPiece = function () {
     this.board.mergePlayer(this.player);
     var rowsRemoved = this.board.sweep();
+    if (rowsRemoved) {
+        this.sfxBeep.start();
+    }
     this.scoreboard.updateScore(rowsRemoved);
     this.playerReset();
 };

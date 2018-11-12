@@ -1,36 +1,69 @@
-function Audio(url) {
+function Audio(url, loop) {
     this.url = url;
-    try {
-        this.context = new AudioContext();
-        this.source = this.context.createBufferSource();
-        this.source.connect(this.context.destination);
-    } catch (e) {
-        // No support for audio context
-    }
+    this.loop = !!loop;
+    this.audioData = null;
+    this.context = new AudioContext();
+    this.source = this.context.createBufferSource();
 }
 
-Audio.prototype.loop = function () {
-    if (!this.context) return;
+Audio.prototype.load = function (callback) {
     var self=  this;
     var request = new XMLHttpRequest();
     request.open('GET', this.url, true);
     request.responseType = 'arraybuffer';
     request.onload = function () {
         self.context.decodeAudioData(request.response, function (audioData) {
-            self.source.buffer = audioData;
-            self.source.loop = true
-            self.source.start();
+            self.audioData = audioData;
+            if (callback) callback();
         });
     };
     request.send();
 };
 
-Audio.prototype.stop = function () {
+Audio.prototype.start = function () {
+    if (!this.audioData) return;
+    this.source = this.context.createBufferSource()
+    this.source.connect(this.context.destination);
+    this.source.buffer = this.audioData;
+    this.source.loop = this.loop;
+    this.source.start(0);
+};
+
+Audio.prototype.mute = function () {
     this.source.disconnect()
 };
 
-Audio.prototype.resume = function () {
+Audio.prototype.unmute = function () {
     this.source.connect(this.context.destination);
 };
 
-module.exports = Audio;
+function FallbackAudio(url, loop) {
+    this.url = url;
+    this.loop = loop | false;
+    this.audioNode = null;
+}
+
+FallbackAudio.prototype.load = function (callback) {
+    this.audioNode = document.createElement('audio');
+    document.body.appendChild(this.audioNode);
+    this.audioNode.oncanplay = callback;
+    this.audioNode.src = this.url;
+    this.audioNode.loop = this.loop;
+};
+
+FallbackAudio.prototype.start = function () {
+    if (!this.audioNode) return;
+    this.audioNode.play();
+}
+
+FallbackAudio.prototype.mute = function () {
+    if (!this.audioNode) return;
+    this.audioNode.pause();
+}
+
+FallbackAudio.prototype.unmute = function () {
+    if (!this.audioNode) return;
+    this.audioNode.play();
+}
+
+module.exports = window.AudioContext ? Audio : FallbackAudio;
