@@ -26,12 +26,14 @@ Keyboard.Q = 'Q';
 Keyboard.W = 'W';
 Keyboard.E = 'E';
 Keyboard.SPACE = 'SPACE';
+Keyboard.P = 'P';
 
 Keyboard.KEYNAMES = {
     37: Keyboard.LEFT,
     38: Keyboard.UP,
     39: Keyboard.RIGHT,
     40: Keyboard.DOWN,
+    80: Keyboard.P,
     81: Keyboard.Q,
     87: Keyboard.W,
     69: Keyboard.E,

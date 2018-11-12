@@ -4,6 +4,9 @@ var Screen = require('./Screen');
 var DropTimer = require('./DropTimer');
 var Keyboard = require('./Keyboard');
 var Scoreboard = require('./Scoreboard');
+var Audio = require('./Audio');
+
+var bgm = require('./media/tetris.mp3');
 
 var DEFAULT_BOARD_WIDTH = 12;
 var DEFAULT_BOARD_HEIGHT = 20;
@@ -16,9 +19,12 @@ function Game(width, height) {
     this.screen = new Screen(this.width, this.height, 20)
     this.timer = new DropTimer(DROP_INTERVAL);
     this.scoreboard = new Scoreboard();
+    this.audio = new Audio(bgm);
 
     this.paused = true;
+    this.gameTime = 0;
     this.reset();
+    this.audio.loop();
     this.update(0);
 
     this.keyMap = this.createKeymap();
@@ -36,8 +42,25 @@ Game.prototype.createKeymap = function () {
     keyMap[Keyboard.UP] = keyMap[Keyboard.E];
     keyMap[Keyboard.W] = this.playerDropNow.bind(this);
     keyMap[Keyboard.SPACE] = keyMap[Keyboard.W];
+    keyMap[Keyboard.P] = this.togglePause.bind(this);
     return keyMap;
 }
+
+Game.prototype.togglePause = function () {
+    if (this.paused) this.resume();
+    else this.pause();
+};
+
+Game.prototype.pause = function () {
+    this.paused = true;
+    this.audio.stop();
+};
+
+Game.prototype.resume = function () {
+    this.paused = false;
+    this.update(this.gameTime);
+    this.audio.resume();
+};
 
 Game.prototype.reset = function () {
     this.paused = false;
@@ -54,6 +77,7 @@ Game.prototype.updateTimeDelta = function (time) {
 
 Game.prototype.update = function (time) {
     var self = this;
+    this.gameTime = time;
     this.timer.drop(time, function () {
         self.playerMoveDown();
     });

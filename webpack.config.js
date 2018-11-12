@@ -9,6 +9,14 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         filename: 'index-[hash:20].js'
     },
+    module: {
+        rules: [
+            {
+                test: /\.mp3$/,
+                use: 'file-loader'
+            },
+        ],
+    },
     plugins: [
         new HtmlWebpackPlugin({
             title: 'Tetris',
