@@ -21,3 +21,4 @@ yarn start
 - `q` - rotate left
 - `e` - rotate right (same as `up`)
 - `w` - drop immediately
+- `p` - pause
