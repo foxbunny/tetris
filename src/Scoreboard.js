@@ -7,7 +7,7 @@ function Scoreboard() {
 }
 
 Scoreboard.prototype.loadScores = function () {
-    this.previousScores = JSON.parse(localStorage.scores) || [];
+    this.previousScores = JSON.parse(localStorage.scores || 'null') || [];
     this.previousScores.sort(function (a, b) {
         return b.score - a.score;
     })
@@ -28,6 +28,7 @@ Scoreboard.prototype.reset = function () {
         time: Date.now(),
         score: this.score,
     });
+    this.score = 0;
     localStorage.scores = JSON.stringify(this.previousScores);
     this.renderScore();
 };
